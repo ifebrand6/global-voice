@@ -1,39 +1,71 @@
-import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
-import { useRouter } from "next/router";
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { gql, useMutation } from '@apollo/client';
+import Link from 'next/link';
 
-const REGISTER = gql`
-    mutation Register($username: String!, $email: String!, $password: String!) {
-        register(username: $username, email: $email, password: $password) {
-            username
-        }
+const REGISTER_MUTATION = gql`
+  mutation Register($email: String!, $password: String!) {
+    register(email: $email, password: $password) {
+      id
+      email
     }
+  }
 `;
 
 export default function Register() {
-    const [form, setForm] = useState({ username: "", email: "", password: "" });
-    const [register, { loading, error }] = useMutation(REGISTER);
-    const router = useRouter();
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [register, { loading }] = useMutation(REGISTER_MUTATION);
 
-    const handleRegister = async () => {
-        await register({ variables: form });
-        alert("Registered successfully!");
-        router.push("/login");
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await register({ variables: { email, password } });
+      debugger
+      router.push('/');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
-    return (
-        <div className="container mt-5">
-            <h2>Register</h2>
-            {error && <p className="text-danger">{error.message}</p>}
-            <input type="text" placeholder="Username" className="form-control"
-                onChange={e => setForm({ ...form, username: e.target.value })} />
-            <input type="email" placeholder="Email" className="form-control"
-                onChange={e => setForm({ ...form, email: e.target.value })} />
-            <input type="password" placeholder="Password" className="form-control"
-                onChange={e => setForm({ ...form, password: e.target.value })} />
-            <button onClick={handleRegister} className="btn btn-primary mt-3" disabled={loading}>
-                {loading ? "Registering..." : "Register"}
-            </button>
+  return (
+    <div className="container mt-5">
+      <h1 className="text-center mb-4">Register</h1>
+      <form className="card p-4 mx-auto" style={{ maxWidth: '400px' }} onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">Email</label>
+          <input
+            type="email"
+            className="form-control"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
-    );
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Password</label>
+          <input
+            type="password"
+            className="form-control"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {error && <div className="alert alert-danger">{error}</div>}
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : 'Register'}
+        </button>
+      </form>
+      <p className="text-center mt-3">
+        Already have an account?  <Link href="/login">login</Link>
+      </p>
+    </div>
+  );
 }
