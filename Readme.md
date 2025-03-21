@@ -27,7 +27,7 @@ The application also supports handling of failed login attempts and account lock
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/auth-assignment.git
+git clone https://github.com/ifebrand6/global-voice
 
 2. Install Dependencies
 Navigate to the project directory and install the required dependencies:
